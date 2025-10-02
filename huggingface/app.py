@@ -540,6 +540,11 @@ class GraphGenerator:
         
         ax.set_title("AI思考連鎖の可視化 (Gemini)", 
                     fontproperties=self.font_properties, fontsize=16, fontweight='bold')
+        # 余白調整と中央寄せ
+        try:
+            ax.set_anchor('C')  # 中央アンカー
+        except Exception:
+            pass
         plt.tight_layout()
         plt.axis('off')
         ax.margins(0.15)
@@ -716,6 +721,12 @@ def create_gradio_interface():
         
         gr.Markdown("# 🧠 AI思考連鎖可視化システム (Gemini版)")
         gr.Markdown("Gemini APIを利用して、AIの思考プロセスを段階的に可視化します。システムプロンプトをカスタマイズできます。")
+        # グラフ画像を中央寄せするためのCSS
+        gr.HTML("""
+        <style>
+        .graph-center img { display:block; margin-left:auto; margin-right:auto; }
+        </style>
+        """)
         
         # .envにすべてのキーがある場合は設定画面を非表示にする
         with gr.Accordion("APIキー設定", open=not has_all_keys, visible=not has_all_keys) as api_accordion:
@@ -775,7 +786,8 @@ def create_gradio_interface():
                         label="思考プロセスネットワーク図", 
                         type="pil", 
                         interactive=False, 
-                        show_download_button=True
+                        show_download_button=True,
+                        elem_classes=["graph-center"]
                     )
             
             gr.Examples(
