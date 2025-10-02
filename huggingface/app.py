@@ -716,6 +716,21 @@ def create_gradio_interface():
         
         gr.Markdown("# 🧠 AI思考連鎖可視化システム (Gemini版)")
         gr.Markdown("Gemini APIを利用して、AIの思考プロセスを段階的に可視化します。システムプロンプトをカスタマイズできます。")
+        # カスタムCSS: グラフ画像を中央に配置
+        gr.HTML("""
+        <style>
+        /* グラフ画像中央寄せ用 */
+        .centered-graph img, .centered-graph canvas { 
+            display: block !important; 
+            margin-left: auto !important; 
+            margin-right: auto !important; 
+        }
+        /* コンポーネント全体も中央寄せの余白調整 */
+        .centered-graph { 
+            text-align: center; 
+        }
+        </style>
+        """)
         
         # .envにすべてのキーがある場合は設定画面を非表示にする
         with gr.Accordion("APIキー設定", open=not has_all_keys, visible=not has_all_keys) as api_accordion:
@@ -775,7 +790,8 @@ def create_gradio_interface():
                         label="思考プロセスネットワーク図", 
                         type="pil", 
                         interactive=False, 
-                        show_download_button=True
+                        show_download_button=True,
+                        elem_classes=["centered-graph"]
                     )
             
             gr.Examples(
