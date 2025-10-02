@@ -1,0 +1,38 @@
+[project]
+name = "aime-based-explanation-system-for-chatgpt-outputs"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "chromadb>=1.0.6",
+    "en-core-web-sm",
+    "google-generativeai>=0.8.0",
+    "google-api-python-client>=2.0.0",
+    "gradio>=5.25.2",
+    "ipykernel>=6.29.5",
+    "ja-core-news-sm",
+    "langchain>=0.3.23",
+    "langchain-community>=0.3.21",
+    "langchain-experimental>=0.3.4",
+    "langchain-openai>=0.3.14",
+    "matplotlib>=3.10.1",
+    "networkx>=3.4.2",
+    "openai>=1.75.0",
+    "pillow>=10.0.0",
+    "pip>=25.0.1",
+    "pypdf>=5.4.0",
+    "pypdf2>=3.0.1",
+    "python-dotenv>=1.1.0",
+    "scikit-learn>=1.6.1",
+    "setuptools>=79.0.0",
+    "spacy>=3.8.5",
+    "tiktoken>=0.9.0",
+    "transformers>=4.51.3",
+    "wheel>=0.45.1",
+    "chromadb>=0.5.0",
+]
+
+[tool.uv.sources]
+en-core-web-sm = { url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl" }
+ja-core-news-sm = { url = "https://github.com/explosion/spacy-models/releases/download/ja_core_news_sm-3.8.0/ja_core_news_sm-3.8.0-py3-none-any.whl" }
