@@ -491,6 +491,14 @@ class GraphGenerator:
         ))
         
         pos = self._custom_hierarchical_layout(G) or nx.spring_layout(G, seed=42)
+        # 位置が視覚的に右寄りになるケースへの対処: X座標を中央へ平行移動
+        if pos:
+            xs = [p[0] for p in pos.values()]
+            if xs:
+                x_mid = (min(xs) + max(xs)) / 2.0
+                if abs(x_mid) > 1e-6:  # 不要な微小移動を避ける
+                    for nid, (x, y) in pos.items():
+                        pos[nid] = (x - x_mid, y)
         
         # エッジの描画
         for u, v, data in G.edges(data=True):
@@ -542,7 +550,19 @@ class GraphGenerator:
                     fontproperties=self.font_properties, fontsize=16, fontweight='bold')
         plt.tight_layout()
         plt.axis('off')
-        ax.margins(0.15)
+        # 軸範囲を左右対称に調整し、中央寄せを明確化
+        xs_after = [p[0] for p in pos.values()]
+        ys_after = [p[1] for p in pos.values()]
+        if xs_after and ys_after:
+            x_span = max(xs_after) - min(xs_after)
+            y_span = max(ys_after) - min(ys_after)
+            pad_x = 0.1 * x_span + 0.5
+            pad_y = 0.1 * y_span + 0.5
+            x_center = (max(xs_after) + min(xs_after)) / 2.0
+            y_center = (max(ys_after) + min(ys_after)) / 2.0
+            ax.set_xlim(x_center - x_span / 2.0 - pad_x, x_center + x_span / 2.0 + pad_x)
+            ax.set_ylim(y_center - y_span / 2.0 - pad_y, y_center + y_span / 2.0 + pad_y)
+        ax.margins(0.05)
         
         return fig
 
@@ -716,6 +736,38 @@ def create_gradio_interface():
         
         gr.Markdown("# 🧠 AI思考連鎖可視化システム (Gemini版)")
         gr.Markdown("Gemini APIを利用して、AIの思考プロセスを段階的に可視化します。システムプロンプトをカスタマイズできます。")
+        # カスタムCSS: グラフ画像を確実に中央に配置（flexレイアウトを列に適用）
+        gr.HTML("""
+        <style>
+        /* グラフ列コンテナを中央寄せレイアウトに */
+        .graph-column { 
+            display: flex !important; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: flex-start; 
+            gap: 0.5rem; 
+        }
+        /* 画像/キャンバス自体を中央 & 可変幅 */
+        .graph-column img, .graph-column canvas { 
+            display: block !important; 
+            margin: 0 auto !important; 
+            max-width: 100% !important; 
+            height: auto !important;
+        }
+        /* Imageコンポーネント外枠をフル幅にしつつ内部を中央寄せ */
+        #graph-image { 
+            width: 100%; 
+            text-align: center; 
+        }
+        #graph-image img { 
+            max-width: 95%; 
+        }
+        /* モバイル向けの縮小余白 */
+        @media (max-width: 780px) { 
+            #graph-image img { max-width: 100%; }
+        }
+        </style>
+        """)
         
         # .envにすべてのキーがある場合は設定画面を非表示にする
         with gr.Accordion("APIキー設定", open=not has_all_keys, visible=not has_all_keys) as api_accordion:
@@ -770,12 +822,13 @@ def create_gradio_interface():
                 with gr.Column(scale=1):
                     answer_output = gr.Markdown(label="AIの最終回答")
                     graph_errors_output = gr.HTML(label="処理に関する通知")
-                with gr.Column(scale=2):
+                with gr.Column(scale=2, elem_classes=["graph-column"]):
                     graph_output = gr.Image(
                         label="思考プロセスネットワーク図", 
                         type="pil", 
                         interactive=False, 
-                        show_download_button=True
+                        show_download_button=True,
+                        elem_id="graph-image"
                     )
             
             gr.Examples(
