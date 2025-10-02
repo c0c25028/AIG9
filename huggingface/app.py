@@ -716,18 +716,35 @@ def create_gradio_interface():
         
         gr.Markdown("# 🧠 AI思考連鎖可視化システム (Gemini版)")
         gr.Markdown("Gemini APIを利用して、AIの思考プロセスを段階的に可視化します。システムプロンプトをカスタマイズできます。")
-        # カスタムCSS: グラフ画像を中央に配置
+        # カスタムCSS: グラフ画像を確実に中央に配置（flexレイアウトを列に適用）
         gr.HTML("""
         <style>
-        /* グラフ画像中央寄せ用 */
-        .centered-graph img, .centered-graph canvas { 
-            display: block !important; 
-            margin-left: auto !important; 
-            margin-right: auto !important; 
+        /* グラフ列コンテナを中央寄せレイアウトに */
+        .graph-column { 
+            display: flex !important; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: flex-start; 
+            gap: 0.5rem; 
         }
-        /* コンポーネント全体も中央寄せの余白調整 */
-        .centered-graph { 
+        /* 画像/キャンバス自体を中央 & 可変幅 */
+        .graph-column img, .graph-column canvas { 
+            display: block !important; 
+            margin: 0 auto !important; 
+            max-width: 100% !important; 
+            height: auto !important;
+        }
+        /* Imageコンポーネント外枠をフル幅にしつつ内部を中央寄せ */
+        #graph-image { 
+            width: 100%; 
             text-align: center; 
+        }
+        #graph-image img { 
+            max-width: 95%; 
+        }
+        /* モバイル向けの縮小余白 */
+        @media (max-width: 780px) { 
+            #graph-image img { max-width: 100%; }
         }
         </style>
         """)
@@ -785,13 +802,13 @@ def create_gradio_interface():
                 with gr.Column(scale=1):
                     answer_output = gr.Markdown(label="AIの最終回答")
                     graph_errors_output = gr.HTML(label="処理に関する通知")
-                with gr.Column(scale=2):
+                with gr.Column(scale=2, elem_classes=["graph-column"]):
                     graph_output = gr.Image(
                         label="思考プロセスネットワーク図", 
                         type="pil", 
                         interactive=False, 
                         show_download_button=True,
-                        elem_classes=["centered-graph"]
+                        elem_id="graph-image"
                     )
             
             gr.Examples(
